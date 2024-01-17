@@ -8,7 +8,7 @@ from pathlib import Path
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 from setuptools import setup
 
-HERE = Path(__file__).parent
+HERE = Path('.')
 
 about = {}
 with open(HERE / "src" / "pye57" / "__version__.py") as f:
@@ -34,6 +34,9 @@ if platform.system() == "Windows":
     if conda_library_dir.exists():
         library_dirs.append(str(conda_library_dir / "lib"))
         include_dirs.append(str(conda_library_dir / "include"))
+        # include xerces-c dll in the package
+        shutil.copy2(conda_library_dir / "bin" / "xerces-c_3_2.dll", HERE / "src" / "pye57")
+        package_data.append("xerces-c_3_2.dll")
 
     # using cibuildwheel
     xerces_dir = Path(os.environ["TEMP"]) / "xerces_c"
@@ -107,6 +110,7 @@ setup(
     ext_modules=ext_modules,
     packages=["pye57"],
     package_dir={"": "src"},
+    include_package_data=True,
     package_data={"pye57": package_data},
     extras_require={"test": "pytest"},
     license="MIT",
